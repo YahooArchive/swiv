@@ -150,3 +150,8 @@ dataCubes:
         title: Unique Users
         formula: $main.countDistinct($user)
 
+settingsLocation:
+  location: file
+  format: 'json'
+  uri: 'temp.json'
+  writable: true

@@ -187,7 +187,7 @@ export class LinkView extends React.Component<LinkViewProps, LinkViewState> {
     const { essence } = this.state;
     var newEssence = linkTile.essence;
 
-    if (essence.getTimeAttribute()) {
+    if (essence.dataCube.getPrimaryTimeExpression()) {
       newEssence = newEssence.changeTimeSelection(essence.getTimeSelection());
     }
 

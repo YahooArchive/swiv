@@ -16,23 +16,8 @@
 
 import * as Q from 'q';
 import * as Qajax from 'qajax';
-import { $, Expression, Executor, Dataset, ChainExpression, SplitAction, Environment } from 'plywood';
 
 Qajax.defaults.timeout = 0; // We'll manage the timeout per request.
-
-function getSplitsDescription(ex: Expression): string {
-  var splits: string[] = [];
-  ex.forEach((ex) => {
-    if (ex instanceof ChainExpression) {
-      ex.actions.forEach((action) => {
-        if (action instanceof SplitAction) {
-          splits.push(action.firstSplitExpression().toString());
-        }
-      });
-    }
-  });
-  return splits.join(';');
-}
 
 var reloadRequested = false;
 function reload() {
@@ -50,7 +35,7 @@ function parseOrNull(json: any): any {
 }
 
 export interface AjaxOptions {
-  method: 'GET' | 'POST';
+  method: 'GET' | 'POST' | 'PUT';
   url: string;
   data?: any;
 }
@@ -64,10 +49,10 @@ export class Ajax {
   static query(options: AjaxOptions): Q.Promise<any> {
     var data = options.data;
 
-    if (data) {
+    /*if (data) {
       if (Ajax.version) data.version = Ajax.version;
       if (Ajax.settingsVersionGetter) data.settingsVersion = Ajax.settingsVersionGetter();
-    }
+    }*/
 
     return Qajax({
       method: options.method,
@@ -81,7 +66,7 @@ export class Ajax {
         if (res && res.action === 'update' && Ajax.onUpdate) Ajax.onUpdate();
         return res;
       })
-      .catch((xhr: XMLHttpRequest | Error): Dataset => {
+      .catch((xhr: XMLHttpRequest | Error): any => {
         if (!xhr) return null; // TS needs this
         if (xhr instanceof Error) {
           throw new Error('client timeout');
@@ -101,17 +86,4 @@ export class Ajax {
       });
   }
 
-  static queryUrlExecutorFactory(name: string, url: string): Executor {
-    return (ex: Expression, env: Environment = {}) => {
-      return Ajax.query({
-        method: "POST",
-        url: url + '?by=' + getSplitsDescription(ex),
-        data: {
-          dataCube: name,
-          expression: ex.toJS(),
-          timezone: env ? env.timezone : null
-        }
-      }).then((res) => Dataset.fromJS(res.result));
-    };
-  }
 }
