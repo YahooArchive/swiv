@@ -62,15 +62,24 @@ export interface StateStore {
 }
 
 export class SettingsStore {
-  static fromTransient(initAppSettings: AppSettings): SettingsStore {
-    var settingsStore = new SettingsStore();
-    settingsStore.readSettings = () => Q(initAppSettings);
+  static fromTransient(initAppSettings: AppSettings, updateOnLoad = true): SettingsStore {
+    var settingsStore = new SettingsStore(true);
+    settingsStore.readSettings = () => {
+      if (settingsStore.autoLoader) {
+        return settingsStore.autoLoader(initAppSettings);
+      } else {
+        return Q(initAppSettings);
+      }
+    };
+    if (updateOnLoad) {
+      settingsStore.hasUpdateOnLoad = () => Q(true);
+    }
     return settingsStore;
   }
 
   static fromReadOnlyFile(filepath: string, format: Format): SettingsStore {
     var settingsStore = new SettingsStore();
-    settingsStore.readSettings = readSettingsFactory(filepath, format, true);
+    settingsStore.readSettings = readSettingsFactory(filepath, format);
     return settingsStore;
   }
 
@@ -101,10 +110,15 @@ export class SettingsStore {
   }
 
 
+  public needsAutoLoader: boolean;
+  public autoLoader: (initAppSettings: AppSettings) => Q.Promise<AppSettings>;
   public readSettings: () => Q.Promise<AppSettings>;
   public writeSettings: (appSettings: AppSettings) => Q.Promise<any>;
+  public hasUpdateOnLoad: () => Q.Promise<boolean>;
 
-  constructor() {}
+  constructor(needsAutoLoader = false) {
+    this.needsAutoLoader = needsAutoLoader;
+  }
 }
 
 

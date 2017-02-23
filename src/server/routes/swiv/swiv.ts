@@ -18,20 +18,20 @@ import { Router, Request, Response } from 'express';
 
 import { SwivRequest } from '../../utils/index';
 import { swivLayout } from '../../views';
-import { SETTINGS_MANAGER } from '../../config';
 
 var router = Router();
 
 router.get('/', (req: SwivRequest, res: Response, next: Function) => {
-  req.getSettings()
-    .then((appSettings) => {
+  req.getFullSettings()
+    .then((fullSettings) => {
+      const { appSettings, timekeeper } = fullSettings;
       var clientSettings = appSettings.toClientSettings();
       res.send(swivLayout({
         version: req.version,
-        title: appSettings.customization.getTitle(req.version),
+        title: appSettings.customization.getTitleWithVersion(req.version),
         user: req.user,
         appSettings: clientSettings,
-        timekeeper: SETTINGS_MANAGER.getTimekeeper(),
+        timekeeper: timekeeper,
         stateful: req.stateful
       }));
     })

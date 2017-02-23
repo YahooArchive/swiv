@@ -34,8 +34,9 @@ router.post('/', (req: SwivRequest, res: Response) => {
     return;
   }
 
-  SETTINGS_MANAGER.getSettings()
-    .then((appSettings) => {
+  req.getFullSettings()
+    .then((fullSettings) => {
+      var { appSettings } = fullSettings;
       var collectionContext = {
         dataCubes: appSettings.dataCubes,
         visualizations: MANIFESTS
@@ -43,7 +44,7 @@ router.post('/', (req: SwivRequest, res: Response) => {
 
       return appSettings.changeCollections(collections.map((collection: CollectionJS) => {
         return Collection.fromJS(collection, collectionContext);
-      }));
+      })).incrementVersion();
     })
     .then((newAppSettings) => SETTINGS_MANAGER.updateSettings(newAppSettings))
     .then(
