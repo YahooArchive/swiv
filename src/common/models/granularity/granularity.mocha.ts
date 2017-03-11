@@ -218,7 +218,7 @@ describe('Granularity', () => {
 
   it('getGranularities appropriately for time', () => {
     var defaults = getGranularities('time');
-    var expectedDefaults = ['PT1M', 'PT5M', 'PT1H', 'P1D', 'P1W'].map(granularityFromJS);
+    var expectedDefaults = ['PT1M', 'PT5M', 'PT15M', 'PT1H', 'P1D', 'P1M'].map(granularityFromJS);
 
     expect(immutableArraysEqual(defaults, expectedDefaults), 'time defaults are returned').to.equal(true);
 
@@ -294,11 +294,11 @@ describe('Granularity', () => {
     var oneMinute = 'PT1M';
 
     var yearLength = new TimeRange({ start: new Date('1994-02-24T00:00:00.000Z'), end: new Date('1995-02-25T00:00:00.000Z') });
-    expect(getBestBucketUnitForRange(yearLength, false).toString()).to.equal(week);
+    expect(getBestBucketUnitForRange(yearLength, false).toString()).to.equal(month);
     expect(getBestBucketUnitForRange(yearLength, true).toString()).to.equal(month);
 
     var monthLength = new TimeRange({ start: new Date('1995-02-24T00:00:00.000Z'), end: new Date('1995-03-25T00:00:00.000Z') });
-    expect(getBestBucketUnitForRange(monthLength, false).toString()).to.equal(day);
+    expect(getBestBucketUnitForRange(monthLength, false).toString()).to.equal(oneHour);
     expect(getBestBucketUnitForRange(monthLength, true).toString()).to.equal(week);
 
     var sevenDaysLength = new TimeRange({ start: new Date('1995-02-20T00:00:00.000Z'), end: new Date('1995-02-28T00:00:00.000Z') });
@@ -310,11 +310,11 @@ describe('Granularity', () => {
     expect(getBestBucketUnitForRange(threeDaysLength, true).toString()).to.equal(twelveHours);
 
     var dayLength = new TimeRange({ start: new Date('1995-02-24T00:00:00.000Z'), end: new Date('1995-02-25T00:00:00.000Z') });
-    expect(getBestBucketUnitForRange(dayLength, false).toString()).to.equal(oneHour);
+    expect(getBestBucketUnitForRange(dayLength, false).toString()).to.equal(fiveMinutes);
     expect(getBestBucketUnitForRange(dayLength, true).toString()).to.equal(sixHours);
 
     var fourHours = new TimeRange({ start: new Date('1995-02-24T00:00:00.000Z'), end: new Date('1995-02-24T04:00:00.000Z') });
-    expect(getBestBucketUnitForRange(fourHours, false).toString()).to.equal(fiveMinutes);
+    expect(getBestBucketUnitForRange(fourHours, false).toString()).to.equal(oneMinute);
     expect(getBestBucketUnitForRange(fourHours, true).toString()).to.equal(oneHour);
 
     var fortyFiveMin = new TimeRange({ start: new Date('1995-02-24T00:00:00.000Z'), end: new Date('1995-02-24T00:45:00.000Z') });
@@ -325,11 +325,12 @@ describe('Granularity', () => {
 
   it('getsBestBucketUnit appropriately for time with bucketing and custom granularities', () => {
     var sixHours = 'PT6H';
+    var fiveMinute = 'PT5M';
     var oneHour = 'PT1H';
     var week = 'P1W';
 
     var dayLength = new TimeRange({ start: new Date('1995-02-24T00:00:00.000Z'), end: new Date('1995-02-25T00:00:00.000Z') });
-    expect(getBestBucketUnitForRange(dayLength, false).toString()).to.equal(oneHour);
+    expect(getBestBucketUnitForRange(dayLength, false).toString()).to.equal(fiveMinute);
     expect(getBestBucketUnitForRange(dayLength, false, granularityFromJS('PT6H')).toString()).to.equal(sixHours);
 
     var yearLength = new TimeRange({ start: new Date('1994-02-24T00:00:00.000Z'), end: new Date('1995-02-25T00:00:00.000Z') });

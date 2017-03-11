@@ -133,6 +133,7 @@ export class DataCubeMock {
       defaultDuration: 'P3D',
       defaultSortMeasure: 'count',
       defaultPinnedDimensions: ['tweet'],
+      defaultSelectedMeasures: ['count'],
       refreshRule: {
         rule: "realtime"
       }

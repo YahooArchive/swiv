@@ -33,6 +33,7 @@ describe.skip('VerticalAxis', () => {
         scale={null}
         stage={null}
         ticks={null}
+        format={null}
       />
     );
 

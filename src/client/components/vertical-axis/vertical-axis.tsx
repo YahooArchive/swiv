@@ -28,6 +28,7 @@ export interface VerticalAxisProps extends React.Props<any> {
   stage: Stage;
   ticks: number[];
   scale: any;
+  format: string;
   topLineExtend?: number;
   hideZero?: boolean;
 }
@@ -45,11 +46,13 @@ export class VerticalAxis extends React.Component<VerticalAxisProps, VerticalAxi
   }
 
   render() {
-    var { stage, ticks, scale, topLineExtend, hideZero } = this.props;
+    var { stage, ticks, scale, format, topLineExtend, hideZero } = this.props;
 
     if (hideZero) ticks = ticks.filter((tick: number) => tick !== 0);
 
-    var formatter = formatterFromData(ticks, Measure.DEFAULT_FORMAT);
+    if (!format) format = Measure.DEFAULT_FORMAT;
+
+    var formatter = formatterFromData(ticks, format);
 
     var lines = ticks.map((tick: any) => {
       var y = roundToHalfPx(scale(tick));

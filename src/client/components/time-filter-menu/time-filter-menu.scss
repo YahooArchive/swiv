@@ -33,7 +33,8 @@
         min-width: 0;
         padding: 0;
         width: 17.5%;
-        margin-right: 3%;
+        margin-right: 2%;
+        margin-bottom: 2%;
 
         &.selected {
           @extend %button-primary;

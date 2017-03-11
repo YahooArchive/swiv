@@ -39,13 +39,15 @@ describe('RefreshRule', () => {
   describe('Auto refresh rate', () => {
     it("works for query", () => {
       expect(RefreshRule.fromJS({ rule: 'query' }).toJS()).to.deep.equal({
-        rule: 'query'
+        rule: 'query',
+        refresh: 'P1Y'
       });
     });
 
     it("works for realtime", () => {
       expect(RefreshRule.fromJS({ rule: 'realtime' }).toJS()).to.deep.equal({
-        rule: 'realtime'
+        rule: 'realtime',
+        refresh: 'P1Y'
       });
     });
 

@@ -21,7 +21,7 @@ import { Dataset } from 'swiv-plywood';
 import { Fn } from '../../../common/utils/general/general';
 import { Stage, Essence, Timekeeper, ExternalView } from '../../../common/models/index';
 import { STRINGS } from '../../config/constants';
-import { download, makeFileName } from '../../utils/download/download';
+import { download, makeFileName, FileFormat } from '../../utils/download/download';
 import { BubbleMenu } from '../bubble-menu/bubble-menu';
 
 
@@ -71,7 +71,7 @@ export class HilukMenu extends React.Component<HilukMenuProps, HilukMenuState> {
     onClose();
   }
 
-  onExport() {
+  doExport(fileFormat: FileFormat) {
     const { onClose, getDownloadableDataset, essence, timekeeper } = this.props;
     const { dataCube, splits } = essence;
     if (!getDownloadableDataset) return;
@@ -83,8 +83,16 @@ export class HilukMenu extends React.Component<HilukMenuProps, HilukMenuState> {
       return `${STRINGS.splitDelimiter}_${dimension.name}`;
     }).join("_");
 
-    download(getDownloadableDataset(), makeFileName(dataCube.name, filters, splitsString), 'csv');
+    download(essence, getDownloadableDataset(), makeFileName(dataCube.name, filters, splitsString), fileFormat);
     onClose();
+  }
+
+  onExportCSV() {
+    this.doExport('csv');
+  }
+
+  onExportXLSX() {
+    this.doExport('xlsx');
   }
 
   render() {
@@ -119,10 +127,16 @@ export class HilukMenu extends React.Component<HilukMenuProps, HilukMenuState> {
 
     if (getDownloadableDataset()) {
       shareOptions.push(<li
-        className="export"
-        key="export"
-        onClick={this.onExport.bind(this)}
+        className="export-csv"
+        key="export-csv"
+        onClick={this.onExportCSV.bind(this)}
       >{STRINGS.exportToCSV}</li>);
+
+      shareOptions.push(<li
+        className="export-xlsx"
+        key="export-xlsx"
+        onClick={this.onExportXLSX.bind(this)}
+      >{STRINGS.exportToXLSX}</li>);
     }
 
     shareOptions.push(<li

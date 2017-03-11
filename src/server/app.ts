@@ -41,6 +41,7 @@ import * as settingsRoutes from './routes/settings/settings';
 import * as mkurlRoutes from './routes/mkurl/mkurl';
 import * as healthRoutes from './routes/health/health';
 import * as errorRoutes from './routes/error/error';
+import RemergeAuth from './remerge-auth';
 
 import { errorLayout } from './views';
 
@@ -48,18 +49,14 @@ function makeGuard(guard: string): Handler {
   return (req: SwivRequest, res: Response, next: Function) => {
     const user = req.user;
     if (!user) {
-      next(new Error('no user'));
+      res.redirect('/login');
       return;
     }
 
     const { allow } = user;
-    if (!allow) {
-      next(new Error('no user.allow'));
-      return;
-    }
-
-    if (!allow[guard]) {
-      next(new Error('not allowed'));
+    if (!allow || !allow[guard]) {
+      res.status(401);
+      res.send('Unauthorized');
       return;
     }
 
@@ -135,32 +132,16 @@ app.use((req: SwivRequest, res: Response, next: Function) => {
   next();
 });
 
-// Auth
-if (AUTH) {
-  app.use(AUTH);
-} else {
-  app.use((req: SwivRequest, res: Response, next: Function) => {
-    if (req.stateful) {
-      req.user = {
-        id: 'admin',
-        email: 'admin@admin.com',
-        displayName: 'Admin',
-        allow: {
-          settings: true
-        }
-      };
-    }
-    next();
-  });
-}
+// Remerge authentication
+RemergeAuth.inject(app);
 
 // Data routes
-addRoutes('/plywood', plywoodRoutes);
-addRoutes('/plyql', plyqlRoutes);
+addGuardedRoutes('/plywood', 'access', plywoodRoutes);
+addGuardedRoutes('/plyql', 'access', plyqlRoutes);
 addRoutes('/mkurl', mkurlRoutes);
-addRoutes('/error', errorRoutes);
+addGuardedRoutes('/error', 'access', errorRoutes);
 if (stateful) {
-  addRoutes('/collections', collectionsRoutes);
+  addGuardedRoutes('/collections', 'access', collectionsRoutes);
   addGuardedRoutes('/settings', 'settings', settingsRoutes);
 }
 
@@ -174,7 +155,7 @@ if (SERVER_SETTINGS.getIframe() === 'deny') {
   });
 }
 
-addRoutes('/', swivRoutes);
+addGuardedRoutes('/', 'access', swivRoutes);
 
 // Catch 404 and redirect to /
 app.use((req: Request, res: Response, next: Function) => {

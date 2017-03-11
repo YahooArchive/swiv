@@ -478,6 +478,7 @@ export class LineChart extends BaseVisualization<LineChartState> {
         stage={yAxisStage}
         ticks={yTicks}
         scale={scaleY}
+        format={measure.format}
       />;
 
       if (splitLength === 1) {

@@ -23,8 +23,8 @@ import { Stage, Essence, Timekeeper, VisualizationProps, DatasetLoad } from '../
 
 import { BaseVisualization, BaseVisualizationState } from '../base-visualization/base-visualization';
 
-const PADDING_H = 60;
-const TOTAL_WIDTH = 176;
+const PADDING_H = 40;
+const TOTAL_WIDTH = 250;
 
 export class Totals extends BaseVisualization<BaseVisualizationState> {
   public static id = TOTALS_MANIFEST.name;

@@ -47,11 +47,11 @@ var handler = CircumstancesHandler.EMPTY()
           }
         }
 
-
-        // ToDo: review this
-        if (!split.limitAction && (autoChanged || splitDimension.kind !== 'time')) {
-          split = split.changeLimit(i ? 5 : 50);
-          autoChanged = true;
+        if ((!split.limitAction || autoChanged) && splitDimension.kind !== 'time') {
+          if (split.toString().indexOf("__time") === -1) {
+            split = split.changeLimit(i ? 10 : 1000);
+            autoChanged = true;
+          }
         }
 
         return split;

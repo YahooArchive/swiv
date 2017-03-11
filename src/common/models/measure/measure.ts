@@ -44,8 +44,8 @@ export interface MeasureJS {
 }
 
 export class Measure extends BaseImmutable<MeasureValue, MeasureJS> {
-  static DEFAULT_FORMAT = '0,0.0 a';
-  static INTEGER_FORMAT = '0,0 a';
+  static DEFAULT_FORMAT = '0,0';
+  static INTEGER_FORMAT = '0,0';
 
   static isMeasure(candidate: any): candidate is Measure {
     return isInstanceOf(candidate, Measure);

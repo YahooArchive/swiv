@@ -88,10 +88,13 @@ export class TimeHelper {
   };
 
   static checkers = [
-    makeCheckpoint(days(95), 'P1W'),
-    makeCheckpoint(days(8), 'P1D'),
-    makeCheckpoint(hours(8), 'PT1H'),
-    makeCheckpoint(hours(3), 'PT5M')];
+    makeCheckpoint(days(190), 'P1M'),
+    makeCheckpoint(days(189), 'P1W'),
+    makeCheckpoint(hours(24), 'P1D'),
+    makeCheckpoint(minutes(1), 'PT1H'),
+    makeCheckpoint(minutes(1), 'PT15M'),
+    makeCheckpoint(minutes(1), 'PT5M')
+  ];
 
   static coarseCheckers = [
     makeCheckpoint(days(95), 'P1M'),
