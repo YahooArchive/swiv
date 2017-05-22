@@ -5,7 +5,7 @@ import * as connectRedis from 'connect-redis';
 const RedisStore = connectRedis(session);
 
 import { Application, Request, Response } from 'express';
-import { PivotRequest } from './utils/index';
+import { SwivRequest } from './utils/index';
 import { User } from '../common/models/index';
 
 import { layout, ViewOptions } from './views';
@@ -38,7 +38,7 @@ export interface Profile extends User {
   _json: any;
 }
 
-export interface AuthedPivotRequest extends PivotRequest {
+export interface AuthedSwivRequest extends SwivRequest {
   logout(): void;
 }
 
@@ -64,7 +64,7 @@ function _setupPassport(app: Application) {
     // simple e-mail check for now
     profile.emails.forEach(({ value }) => {
       if (/@remerge\.io$/.test(value)) {
-        // inject email and allow hash, used by pivot
+        // inject email and allow hash, used by swiv
         profile.email = value;
         profile.allow = {
           access: true,
@@ -95,7 +95,7 @@ function _setupRoutes(app: Application) {
   );
 
   app.get('/login',
-    (req: AuthedPivotRequest, res: Response) => {
+    (req: AuthedSwivRequest, res: Response) => {
       req.getSettings()
         .then((appSettings) => {
           res.send(_buildLayout({
@@ -108,7 +108,7 @@ function _setupRoutes(app: Application) {
   );
 
   app.get('/logout',
-    (req: AuthedPivotRequest, res: Response) => {
+    (req: AuthedSwivRequest, res: Response) => {
       req.logout();
       res.redirect('/');
     }
