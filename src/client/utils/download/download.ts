@@ -18,7 +18,7 @@ import * as Q from 'q';
 import * as filesaver from 'browser-filesaver';
 import * as xlsx from 'xlsx-exporter';
 import { Essence } from '../../../common/models/index';
-import { formatValue } from '../../../common/utils/formatter/formatter';
+import { formatDateWithTZ, formatValue } from '../../../common/utils/formatter/formatter';
 import { Dataset, TimeRange } from 'swiv-plywood';
 
 export type FileFormat = "csv" | "tsv" | "json" | "txt" | "xlsx";
@@ -66,7 +66,7 @@ export function datasetToSeparatedValues(essence: Essence, dataset: Dataset, sep
     return row.map((value: any) => {
       let formatted: string;
       if (TimeRange.isTimeRange(value)) {
-        formatted = value.start.toISOString();
+        formatted = formatDateWithTZ(value.start, essence.timezone);
       } else {
         formatted = formatValue(value);
       }
@@ -115,7 +115,7 @@ export function datasetToXLSX(essence: Essence, dataset: Dataset): Q.Promise<Wri
   const data = datasetToRows(essence, dataset).map((row) => {
     return row.map((value: any) => {
       if (TimeRange.isTimeRange(value)) {
-        return value.start;
+        return formatDateWithTZ(value.start, essence.timezone);
       }
       return value;
     });
