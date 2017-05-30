@@ -95,7 +95,7 @@ describe('CollectionTile', () => {
             {
               "bucketAction": {
                 "action": "timeBucket",
-                "duration": "PT15M"
+                "duration": "P1D"
               },
               "expression": {
                 "name": "time",

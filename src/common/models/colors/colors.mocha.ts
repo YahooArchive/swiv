@@ -139,12 +139,12 @@ describe('Colors', () => {
   describe('#getColors', () => {
     it('works in basic case (with null)', () => {
       var colors = Colors.fromValues('country', [null, 'UK', 'India', 'Russia', 'Madagascar']);
-      expect(colors.getColors(['UK', null, 'lol'])).to.deep.equal(['#423D4F', '#666666', null]);
+      expect(colors.getColors(['UK', null, 'lol'])).to.deep.equal(['#2D95CA', '#666666', null]);
     });
 
     it('works in basic case (no null)', () => {
       var colors = Colors.fromValues('country', ['Null Island', 'UK', 'India', 'Russia', 'Madagascar']);
-      expect(colors.getColors(['UK', null, 'lol'])).to.deep.equal(['#4A6860', null, null]);
+      expect(colors.getColors(['UK', null, 'lol'])).to.deep.equal(['#EFB925', null, null]);
     });
 
   });
