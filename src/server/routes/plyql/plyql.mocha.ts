@@ -91,7 +91,7 @@ function responseHandler(err: any, res: any) {
 }
 
 function testPlyqlHelper(testName: string, contentType: string, queryStr: string) {
-  it(testName, (testComplete) => {
+  it(testName, (testComplete: any) => {
     supertest(app)
       .post('/')
       .set('Content-Type', "application/json")
