@@ -74,6 +74,8 @@ export interface PositionHover {
 export interface TableState extends BaseVisualizationState {
   flatData?: PseudoDatum[];
   hoverRow?: Datum;
+
+  resizedLeft?: number;
 }
 
 export class Table extends BaseVisualization<TableState> {
@@ -95,7 +97,11 @@ export class Table extends BaseVisualization<TableState> {
   getSegmentWidth(): number {
     const { isThumbnail } = this.props;
 
-    return isThumbnail ? THUMBNAIL_SEGMENT_WIDTH : SEGMENT_WIDTH;
+    return isThumbnail ? THUMBNAIL_SEGMENT_WIDTH : this.state.resizedLeft || SEGMENT_WIDTH;
+  }
+
+  updateLeftOffset(value: number) {
+    this.setState({resizedLeft: value});
   }
 
   calculateMousePosition(x: number, y: number): PositionHover {
@@ -432,8 +438,9 @@ export class Table extends BaseVisualization<TableState> {
       <div className="highlight">{highlighter}</div>
     </div>;
 
+    let corner_style = {width: this.getSegmentWidth()};
     const corner = <div className="corner">
-      <div className="corner-wrap">{segmentTitle}</div>
+      <div className="corner-wrap" style={corner_style}>{segmentTitle}</div>
       {cornerSortArrow}
     </div>;
 
@@ -467,7 +474,7 @@ export class Table extends BaseVisualization<TableState> {
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseLeave={this.onMouseLeave.bind(this)}
         onScroll={this.onSimpleScroll.bind(this)}
-
+        onLeftColumnResize={this.updateLeftOffset.bind(this)}
       />
 
       {highlightBubble}
