@@ -242,6 +242,8 @@ export class SelectableStringFilterMenu extends React.Component<SelectableString
       }
 
       var checkboxType = filterMode === Filter.EXCLUDED ? 'cross' : 'check';
+      let longestString = Math.max(...rowStrings.map(function (rowString: String): number {return rowString.length; }));
+      let rowstyle = {width: longestString * 8};
       rows = rowStrings.map((segmentValue) => {
           var segmentValueStr = String(segmentValue);
           var selected = selectedValues && selectedValues.contains(segmentValue);
@@ -251,6 +253,7 @@ export class SelectableStringFilterMenu extends React.Component<SelectableString
             key={segmentValueStr}
             title={segmentValueStr}
             onClick={this.onValueClick.bind(this, segmentValue)}
+            style={rowstyle}
           >
             <div className="row-wrapper">
               <Checkbox type={checkboxType as CheckboxType} selected={selected}/>
