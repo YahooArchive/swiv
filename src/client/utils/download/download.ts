@@ -66,7 +66,7 @@ export function datasetToSeparatedValues(essence: Essence, dataset: Dataset, sep
     return row.map((value: any) => {
       let formatted: string;
       if (TimeRange.isTimeRange(value)) {
-        formatted = formatDateWithTZ(value.start, essence.timezone);
+        formatted = formatDateWithTZ(value.start, essence.timezone, false);
       } else {
         formatted = formatValue(value);
       }
@@ -115,7 +115,7 @@ export function datasetToXLSX(essence: Essence, dataset: Dataset): Q.Promise<Wri
   const data = datasetToRows(essence, dataset).map((row) => {
     return row.map((value: any) => {
       if (TimeRange.isTimeRange(value)) {
-        return formatDateWithTZ(value.start, essence.timezone);
+        return formatDateWithTZ(value.start, essence.timezone, false);
       }
       return value;
     });

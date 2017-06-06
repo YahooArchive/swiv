@@ -93,8 +93,8 @@ export function formatNumberRange(value: NumberRange) {
   return `${formatValue(value.start || `any`)} to ${formatValue(value.end  || `any`)}`;
 }
 
-export function formatDateWithTZ(value: Date, timezone: Timezone): string {
-  return moment.tz(value, timezone.toString()).format("YYYY-MM-DD HH:mm:ss (z)");
+export function formatDateWithTZ(value: Date, timezone: Timezone, showTZ: boolean): string {
+  return moment.tz(value, timezone.toString()).format(showTZ ? "YYYY-MM-DD HH:mm:ss (z)" : "YYYY-MM-DD HH:mm:ss");
 }
 
 export function formatValue(value: any, timezone?: Timezone, displayYear?: DisplayYear): string {

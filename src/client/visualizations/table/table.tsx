@@ -43,7 +43,7 @@ const HIGHLIGHT_BUBBLE_V_OFFSET = -4;
 
 function formatSegment(value: any, timezone: any): string {
   if (TimeRange.isTimeRange(value)) {
-    return formatDateWithTZ(value.start, timezone);
+    return formatDateWithTZ(value.start, timezone, true);
   } else if (NumberRange.isNumberRange(value)) {
     return formatNumberRange(value);
   }
