@@ -242,7 +242,7 @@ export class SelectableStringFilterMenu extends React.Component<SelectableString
       }
 
       var checkboxType = filterMode === Filter.EXCLUDED ? 'cross' : 'check';
-      let longestString = Math.max(...rowStrings.map(function (rowString: String): number {return rowString.length; }));
+      let longestString = Math.max(...rowStrings.map(function (rowString: String): number {return rowString ? rowString.length : 0; }));
       let rowstyle = {width: Math.max(450, longestString * 8)};
       rows = rowStrings.map((segmentValue) => {
           var segmentValueStr = String(segmentValue);
