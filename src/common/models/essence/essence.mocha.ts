@@ -237,7 +237,7 @@ describe('Essence', () => {
           {
             "bucketAction": {
               "action": "timeBucket",
-              "duration": "P1D"
+              "duration": "PT15M"
             },
             "expression": {
               "name": "time",

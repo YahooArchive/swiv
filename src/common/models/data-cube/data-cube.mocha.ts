@@ -328,6 +328,7 @@ describe('DataCube', () => {
           "priority": 13
         },
         "refreshRule": {
+          "refresh": "P1Y",
           "rule": "query"
         },
         "source": "wiki",
@@ -456,7 +457,8 @@ describe('DataCube', () => {
         "clusterName": "druid",
         "source": "wiki",
         "refreshRule": {
-          "rule": "realtime"
+          "refresh": "PT1M",
+          "rule": "fixed"
         },
         introspection: 'autofill-all',
         "defaultFilter": { "op": "literal", "value": true },
@@ -514,7 +516,8 @@ describe('DataCube', () => {
         "clusterName": "druid",
         "source": "wiki",
         "refreshRule": {
-          "rule": "realtime"
+          "refresh": "PT1M",
+          "rule": "fixed"
         },
         introspection: 'autofill-all',
         "defaultFilter": { "op": "literal", "value": true },
@@ -634,7 +637,8 @@ describe('DataCube', () => {
         ],
         "name": "wiki",
         "refreshRule": {
-          "rule": "realtime"
+          "refresh": "PT1M",
+          "rule": "fixed"
         },
         "source": "wiki",
         "timeAttribute": "__time",
