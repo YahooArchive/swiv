@@ -332,6 +332,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
       min={110}
       max={1000}
       onResize={this.leftWidthChange.bind(this)}
+      hideIcon={true}
     />;
   }
 
