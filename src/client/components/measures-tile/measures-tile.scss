@@ -40,6 +40,10 @@
     &:hover {
       background: $hover;
     }
+
+    &.highlighted {
+      background: $hover;
+    }
   }
 
   .checkbox {

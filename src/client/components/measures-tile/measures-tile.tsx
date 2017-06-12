@@ -27,6 +27,8 @@ import { Checkbox, CheckboxType } from '../checkbox/checkbox';
 import { TileHeaderIcon } from '../tile-header/tile-header';
 import { HighlightString } from '../highlight-string/highlight-string';
 import { SearchableTile } from '../searchable-tile/searchable-tile';
+import { GlobalEventListener } from "../global-event-listener/global-event-listener";
+
 
 export interface MeasuresTileProps extends React.Props<any> {
   clicker: Clicker;
@@ -37,6 +39,7 @@ export interface MeasuresTileProps extends React.Props<any> {
 export interface MeasuresTileState {
   showSearch?: boolean;
   searchText?: string;
+  highlightedValue?: any;
 }
 
 export class MeasuresTile extends React.Component<MeasuresTileProps, MeasuresTileState> {
@@ -82,27 +85,65 @@ export class MeasuresTile extends React.Component<MeasuresTileProps, MeasuresTil
     localStorage.set('is-multi-measure', !essence.getEffectiveMultiMeasureMode());
   }
 
-  render() {
-    var { essence, style } = this.props;
-    var { showSearch, searchText } = this.state;
-    var { dataCube } = essence;
-    var multiMeasureMode = essence.getEffectiveMultiMeasureMode();
-    var selectedMeasures = essence.getEffectiveSelectedMeasure();
+  showMeasures() {
+    let { essence } = this.props;
+    let { searchText } = this.state;
 
-    var checkboxType: CheckboxType = multiMeasureMode ? 'check' : 'radio';
-
-    var shownMeasures = dataCube.measures.toArray();
+    let shownMeasures = essence.dataCube.measures.toArray();
     if (searchText) {
       shownMeasures = shownMeasures.filter((m) => {
         return m.getTitleWithUnits().toLowerCase().indexOf(searchText.toLowerCase()) !== -1;
       });
     }
+    return shownMeasures;
+  }
+
+  globalKeyDownListener(e: KeyboardEvent) {
+    if (e.shiftKey && e.keyCode === 77) {
+      e.preventDefault();
+      this.toggleSearch();
+    }
+  }
+
+  localKeyDownListener(e: KeyboardEvent) {
+    let { clicker } = this.props;
+    let { highlightedValue} = this.state;
+    if ([38, 40, 32].some(x => x === e.keyCode)) {
+      let showMeasures = this.showMeasures();
+      switch (e.keyCode) {
+        case(38): { // arrow up
+          highlightedValue = highlightedValue ? showMeasures[showMeasures.indexOf(highlightedValue) - 1] : showMeasures[0];
+          break;
+        }
+        case(40): { // arrow down
+          highlightedValue = highlightedValue ? showMeasures[showMeasures.indexOf(highlightedValue) + 1] : showMeasures[0];
+          break;
+        }
+        case(32): { // space
+          e.preventDefault();
+          clicker.toggleEffectiveMeasure(highlightedValue);
+          break;
+        }
+      }
+      this.setState({ highlightedValue });
+    }
+  }
+
+  render() {
+    let { essence, style } = this.props;
+    let { showSearch, searchText, highlightedValue } = this.state;
+    let multiMeasureMode = essence.getEffectiveMultiMeasureMode();
+    let selectedMeasures = essence.getEffectiveSelectedMeasure();
+
+    var checkboxType: CheckboxType = multiMeasureMode ? 'check' : 'radio';
+
+    let shownMeasures = this.showMeasures();
 
     var rows = shownMeasures.map(measure => {
       var measureName = measure.name;
       var selected = selectedMeasures.has(measureName);
       return <div
-        className={classNames('row', { selected })}
+        className={classNames('row', { selected }, {'highlighted': measure === highlightedValue})}
         key={measureName}
         onClick={this.measureClick.bind(this, measure)}
       >
@@ -147,7 +188,11 @@ export class MeasuresTile extends React.Component<MeasuresTileProps, MeasuresTil
       showSearch={showSearch}
       icons={icons}
       className='measures-tile'
+      onKeyDown={this.localKeyDownListener.bind(this)}
     >
+      <GlobalEventListener
+        keyDown={this.globalKeyDownListener.bind(this)}
+      />
       <div className="rows">
         { rows }
         { message }
