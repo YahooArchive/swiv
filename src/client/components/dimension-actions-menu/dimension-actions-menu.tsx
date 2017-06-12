@@ -35,6 +35,10 @@ export interface DimensionActionsMenuProps extends React.Props<any> {
   triggerFilterMenu: (dimension: Dimension) => void;
   triggerSplitMenu: (dimension: Dimension) => void;
   onClose: Fn;
+  filterAction?: any;
+  pinAction?: any;
+  splitAction?: any;
+  splitAppendAction?: any;
 }
 
 export interface DimensionActionsMenuState {
@@ -92,19 +96,19 @@ export class DimensionActionsMenu extends React.Component<DimensionActionsMenuPr
       openOn={openOn}
       onClose={onClose}
     >
-      <div className="filter action" onClick={this.onFilter.bind(this)}>
+      <div className="filter action" onClick={this.onFilter.bind(this)} ref={this.props.filterAction}>
         <SvgIcon svg={require('../../icons/preview-filter.svg')}/>
         <div className="action-label">{STRINGS.filter}</div>
       </div>
-      <div className="pin action" onClick={this.onPin.bind(this)}>
+      <div className="pin action" onClick={this.onPin.bind(this)} ref={this.props.pinAction}>
         <SvgIcon svg={require('../../icons/preview-pin.svg')}/>
         <div className="action-label">{STRINGS.pin}</div>
       </div>
-      <div className="split action" onClick={this.onSplit.bind(this)}>
+      <div className="split action" onClick={this.onSplit.bind(this)} ref={this.props.splitAction}>
         <SvgIcon svg={require('../../icons/preview-split.svg')}/>
         <div className="action-label">{STRINGS.split}</div>
       </div>
-      <div className="subsplit action" onClick={this.onSubsplit.bind(this)}>
+      <div className="subsplit action" onClick={this.onSubsplit.bind(this)} ref={this.props.splitAppendAction}>
         <SvgIcon svg={require('../../icons/preview-subsplit.svg')}/>
         <div className="action-label">{STRINGS.subsplit}</div>
       </div>

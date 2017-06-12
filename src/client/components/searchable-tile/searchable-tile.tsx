@@ -45,6 +45,7 @@ export interface SearchableTileProps extends React.Props<any> {
   title: string;
   onDragStart?: Fn;
   actions?: TileAction[];
+  onKeyDown?: Fn;
 }
 
 export interface SearchableTileState {
@@ -187,7 +188,7 @@ export class SearchableTile extends React.Component<SearchableTileProps, Searcha
 
     var searchBar: JSX.Element = null;
     if (showSearch) {
-      searchBar = <div className="search-box" ref="search-box">
+      searchBar = <div className="search-box" ref="search-box" onKeyDown={this.props.onKeyDown}>
         <ClearableInput
           placeholder="Search"
           focusOnMount={true}
