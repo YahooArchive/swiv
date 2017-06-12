@@ -98,7 +98,7 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
   setAutoRefreshFromDataCube(dataCube: DataCube) {
     const { refreshRule } = dataCube;
     if (refreshRule.isFixed()) return;
-    this.setAutoRefreshRate(Duration.fromJS('PT5M')); // ToDo: make this configurable maybe?
+    this.setAutoRefreshRate(Duration.fromJS('P1Y')); // ToDo: make this configurable maybe? YES WE SHOULD
   }
 
   setAutoRefreshRate(rate: Duration) {
