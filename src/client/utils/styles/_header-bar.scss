@@ -76,6 +76,7 @@
 
       &.help::after { content: 'Google Groups'; }
       &.auto-refresh::after { content: 'Refresh options'; }
+      &.refresh-button::after { content: 'Refresh now'; }
       &.hiluk::after { content: 'Share link'; }
       &.user::after { content: 'User'; }
       &.github::after { content: 'Swiv on Github'; }
