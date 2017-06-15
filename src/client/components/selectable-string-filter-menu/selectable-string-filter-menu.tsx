@@ -181,7 +181,7 @@ export class SelectableStringFilterMenu extends React.Component<SelectableString
   globalKeyDownListener(e: KeyboardEvent) {
     let { highlightedValue, selectedValues} = this.state;
 
-    if ([38, 40, 32].some(x => x === e.keyCode)) {
+    if ([13, 32, 38, 40].some(x => x === e.keyCode)) {
       let rowStrings = this.generateRowStrings();
       switch (e.keyCode) {
         case(38): { // arrow up
@@ -196,6 +196,11 @@ export class SelectableStringFilterMenu extends React.Component<SelectableString
           e.preventDefault();
           selectedValues = selectedValues.toggle(highlightedValue);
           break;
+        }
+        case(13): { //enter
+          if (rowStrings.length === 1) {
+            selectedValues = selectedValues.toggle(rowStrings[0]);
+          }
         }
       }
       this.setState({ highlightedValue });
