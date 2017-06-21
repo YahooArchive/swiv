@@ -16,6 +16,7 @@
 
 import * as path from 'path';
 import * as nopt from 'nopt';
+import * as fs from 'fs';
 import { TRACKER, LOGGER } from 'logger-tracker';
 
 import { arraySum } from '../common/utils/general/general';
@@ -153,9 +154,9 @@ const SETTINGS_INPUTS = ['config', 'examples', 'file', 'druid', 'postgres', 'mys
 
 var numSettingsInputs = arraySum(SETTINGS_INPUTS.map((input) => zeroOne(parsedArgs[input])));
 
-if (numSettingsInputs === 0) {
-  exitWithMessage(USAGE);
-}
+// if (numSettingsInputs === 0) {
+//   exitWithMessage(USAGE);
+// }
 
 if (numSettingsInputs > 1) {
   console.error(`only one of --${SETTINGS_INPUTS.join(', --')} can be given on the command line`);
@@ -190,8 +191,19 @@ if (serverSettingsFilePath) {
     exitWithError(`Could not load config from '${serverSettingsFilePath}': ${e.message}`);
   }
 } else {
-  anchorPath = process.cwd();
-  serverSettingsJS = {};
+  if (fs.existsSync('config.yaml')) {
+    serverSettingsFilePath = 'config.yaml';
+    anchorPath = path.dirname(serverSettingsFilePath);
+    try {
+      serverSettingsJS = loadFileSync(serverSettingsFilePath, 'yaml');
+      LOGGER.log(`Didn't receive --config argument. Using default config.yaml`);
+    } catch (e) {
+      exitWithError(`Could not load config from 'config.yaml': ${e.message}`);
+    }
+  } else {
+    anchorPath = process.cwd();
+    serverSettingsJS = {};
+  }
 }
 
 if (parsedArgs['port']) {
