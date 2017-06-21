@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { rollbar } from "../../utils/rollbarlog/rollbarlog";
 require('./query-error.css');
 
 import * as React from 'react';
@@ -33,13 +34,15 @@ export class QueryError extends React.Component<QueryErrorProps, QueryErrorState
   }
 
   render() {
-    var { error } = this.props;
+    let { error } = this.props;
+    if (rollbar) rollbar.error(error);
 
     return <div className="query-error">
-      <div className="whiteout"></div>
+      <div className="whiteout"/>
       <div className="error-container">
         <div className="error">{STRINGS.queryError}</div>
-        <div className="message">{error.message}</div>
+        <div className="message">{error.message}</div><br/>
+        { rollbar ? <div>This error has been automatically logged to Rollbar as well.</div> : null }
       </div>
     </div>;
   }

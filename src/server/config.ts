@@ -18,6 +18,7 @@ import * as path from 'path';
 import * as nopt from 'nopt';
 import * as fs from 'fs';
 import { TRACKER, LOGGER } from 'logger-tracker';
+import * as Rollbar from 'rollbar';
 
 import { arraySum } from '../common/utils/general/general';
 import { Cluster, DataCube, SupportedType, AppSettings } from '../common/models/index';
@@ -172,6 +173,7 @@ export const PRINT_CONFIG = Boolean(parsedArgs['print-config']);
 export const START_SERVER = !PRINT_CONFIG;
 
 if (START_SERVER) LOGGER.init();
+let SwivLogger = LOGGER;
 
 // Load server settings
 var serverSettingsFilePath = parsedArgs['config'];
@@ -221,6 +223,20 @@ if (parsedArgs['auth']) {
 
 export const VERBOSE = Boolean(parsedArgs['verbose'] || serverSettingsJS.verbose);
 export const SERVER_SETTINGS = ServerSettings.fromJS(serverSettingsJS);
+export const ROLLBAR = serverSettingsJS.rollbar || '';
+
+
+if (ROLLBAR && START_SERVER) {
+  const rollbarConfig = {
+    accessToken: ROLLBAR.server_token,
+    captureUncaught: true,
+    captureUnhandledRejections: true,
+    environment: ROLLBAR.environment,
+    reportLevel: ROLLBAR.report_level
+  };
+  SwivLogger = new Rollbar(rollbarConfig);
+}
+
 
 // --- Tracker --------------------------------
 
@@ -237,7 +253,7 @@ var auth = SERVER_SETTINGS.auth;
 var authMiddleware: any = null;
 if (auth && auth !== 'none') {
   auth = path.resolve(anchorPath, auth);
-  LOGGER.log(`Using auth ${auth}`);
+  SwivLogger.log(`Using auth ${auth}`);
   try {
     var authModule = require(auth);
   } catch (e) {
@@ -249,7 +265,7 @@ if (auth && auth !== 'none') {
   }
   if (typeof authModule.auth !== 'function') exitWithError(`Invalid auth module: must export 'auth' function`);
   authMiddleware = authModule.auth({
-    logger: LOGGER,
+    logger: SwivLogger,
     tracker: TRACKER,
     verbose: VERBOSE,
     version: VERSION,
@@ -260,7 +276,7 @@ export const AUTH = authMiddleware;
 
 // --- Sign of Life -------------------------------
 if (START_SERVER) {
-  LOGGER.log(`Starting Swiv v${VERSION}`);
+  SwivLogger.log(`Starting Swiv v${VERSION}`);
   TRACKER.track({
     eventType: 'swiv_init',
     metric: 'init',
@@ -336,7 +352,7 @@ if (serverSettingsFilePath) {
 }
 
 export const SETTINGS_MANAGER = new SettingsManager(settingsStore, {
-  logger: LOGGER,
+  logger: SwivLogger,
   verbose: VERBOSE,
   anchorPath,
   initialLoadTimeout: SERVER_SETTINGS.getPageMustLoadTimeout()

@@ -17,6 +17,7 @@
 import * as express from 'express';
 import { Request, Response, Router, Handler } from 'express';
 import * as hsts from 'hsts';
+import * as Rollbar from 'rollbar';
 
 import * as path from 'path';
 import * as bodyParser from 'body-parser';
@@ -30,9 +31,9 @@ if (!WallTime.rules) {
   WallTime.init(tzData.rules, tzData.zones);
 }
 
-import { GetSettingsOptions } from '../server/utils/settings-manager/settings-manager';
+import { GetSettingsOptions } from './utils/settings-manager/settings-manager';
 import { SwivRequest } from './utils/index';
-import { VERSION, AUTH, SERVER_SETTINGS, SETTINGS_MANAGER } from './config';
+import { VERSION, SERVER_SETTINGS, SETTINGS_MANAGER, ROLLBAR } from './config';
 import * as plywoodRoutes from './routes/plywood/plywood';
 import * as plyqlRoutes from './routes/plyql/plyql';
 import * as swivRoutes from './routes/swiv/swiv';
@@ -177,6 +178,19 @@ if (app.get('env') === 'development') { // NODE_ENV
 
 // production error handler
 // no stacktraces leaked to user
+if (ROLLBAR) {
+  const rollbarConfig = {
+    accessToken: ROLLBAR.server_token,
+    captureUncaught: true,
+    captureUnhandledRejections: true,
+    environment: ROLLBAR.environment,
+    logLevel: 'info',
+    reportLevel: ROLLBAR.report_level
+  };
+  const rollbar = new Rollbar(rollbarConfig);
+  app.use(rollbar.errorHandler());
+}
+
 app.use((err: any, req: Request, res: Response, next: Function) => {
   LOGGER.error(`Server Error: ${err.message}`);
   LOGGER.error(err.stack);
