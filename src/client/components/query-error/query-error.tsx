@@ -42,7 +42,6 @@ export class QueryError extends React.Component<QueryErrorProps, QueryErrorState
       <div className="error-container">
         <div className="error">{STRINGS.queryError}</div>
         <div className="message">{error.message}</div><br/>
-        { rollbar ? <div>This error has been automatically logged to Rollbar as well.</div> : null }
       </div>
     </div>;
   }
