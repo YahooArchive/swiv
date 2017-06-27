@@ -20,6 +20,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as Q from 'q';
 
+import { SortAction } from 'swiv-plywood';
 import { SvgIcon } from '../svg-icon/svg-icon';
 import { STRINGS, CORE_ITEM_WIDTH, CORE_ITEM_GAP } from '../../config/constants';
 import { Stage, Clicker, Essence, VisStrategy, DataCube, Filter, SplitCombine, Dimension, DragPosition } from '../../../common/models/index';
@@ -246,6 +247,16 @@ export class SplitTile extends React.Component<SplitTileProps, SplitTileState> {
       newSplitCombine = DragManager.getDragSplit();
     } else if (DragManager.getDragDimension()) {
       newSplitCombine = SplitCombine.fromExpression(DragManager.getDragDimension().expression);
+    }
+
+    // Default to infinite limit for time splits
+    if (DragManager.getDragDimension().name === "time") {
+      newSplitCombine = newSplitCombine
+        .changeLimit(Infinity)
+        .changeSortAction(new SortAction({
+          expression: DragManager.getDragDimension().expression,
+          direction: SortAction.DESCENDING
+        }));
     }
 
     if (newSplitCombine) {

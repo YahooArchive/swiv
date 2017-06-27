@@ -144,7 +144,7 @@ export class StringFilterMenu extends React.Component<StringFilterMenuProps, Str
         onClauseChange={this.updateFilter.bind(this)}
       />;
     } else {
-      menuSize = Stage.fromSize(250, 410);
+      menuSize = Stage.fromSize(450, 410);
       menuCont = <SelectableStringFilterMenu
         dimension={dimension}
         clicker={clicker}

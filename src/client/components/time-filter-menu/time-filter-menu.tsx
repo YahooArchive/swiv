@@ -42,10 +42,15 @@ export interface Preset {
 var $maxTime = $(FilterClause.MAX_TIME_REF_NAME);
 var latestPresets: Preset[] = [
   { name: '1H',  selection: $maxTime.timeRange('PT1H', -1) },
-  { name: '6H',  selection: $maxTime.timeRange('PT6H', -1) },
-  { name: '1D',  selection: $maxTime.timeRange('P1D', -1)  },
-  { name: '7D',  selection: $maxTime.timeRange('P1D', -7)  },
-  { name: '30D', selection: $maxTime.timeRange('P1D', -30) }
+  { name: '6H',  selection: $maxTime.timeRange('PT1H', -6) },
+  { name: '24H', selection: $maxTime.timeRange('PT1H', -24) },
+  { name: '36H', selection: $maxTime.timeRange('PT1H', -36) },
+  { name: '3D',  selection: $maxTime.timeRange('P1D', -3) },
+  { name: '7D',  selection: $maxTime.timeRange('P1D', -7) },
+  { name: '14D', selection: $maxTime.timeRange('P1D', -14) },
+  { name: '1M',  selection: $maxTime.timeRange('P1M', -1) },
+  { name: '3M',  selection: $maxTime.timeRange('P1M', -3) },
+  { name: '6M',  selection: $maxTime.timeRange('P1M', -6) }
 ];
 
 var $now = $(FilterClause.NOW_REF_NAME);

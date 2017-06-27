@@ -43,7 +43,7 @@ app.use((req: SwivRequest, res: Response, next: Function) => {
 app.use('/', mkurlRouter);
 
 describe('mkurl router', () => {
-  it('gets a simple url back', (testComplete) => {
+  it('gets a simple url back', (testComplete: any) => {
     supertest(app)
       .post('/')
       .set('Content-Type', "application/json")
@@ -70,7 +70,7 @@ describe('mkurl router', () => {
       }, testComplete);
   });
 
-  it('gets a complex url back', (testComplete) => {
+  it('gets a complex url back', (testComplete: any) => {
     supertest(app)
       .post('/')
       .set('Content-Type', "application/json")
@@ -96,7 +96,7 @@ describe('mkurl router', () => {
       }, testComplete);
   });
 
-  it('gets a url filtered on article name back', (testComplete) => {
+  it('gets a url filtered on article name back', (testComplete: any) => {
     supertest(app)
       .post('/')
       .set('Content-Type', "application/json")
@@ -122,7 +122,7 @@ describe('mkurl router', () => {
       }, testComplete);
   });
 
-  it('gets a url filtered on match back', (testComplete) => {
+  it('gets a url filtered on match back', (testComplete: any) => {
     supertest(app)
       .post('/')
       .set('Content-Type', "application/json")
@@ -167,7 +167,7 @@ describe('mkurl router', () => {
       }, testComplete);
   });
 
-  it('gets a url filtered on contains', (testComplete) => {
+  it('gets a url filtered on contains', (testComplete: any) => {
     supertest(app)
       .post('/')
       .set('Content-Type', "application/json")
@@ -213,7 +213,7 @@ describe('mkurl router', () => {
       }, testComplete);
   });
 
-  it('gets a url filtered on set contains', (testComplete) => {
+  it('gets a url filtered on set contains', (testComplete: any) => {
     supertest(app)
       .post('/')
       .set('Content-Type', "application/json")
@@ -259,7 +259,7 @@ describe('mkurl router', () => {
       }, testComplete);
   });
 
-  it('gets a url with split on time back', (testComplete) => {
+  it('gets a url with split on time back', (testComplete: any) => {
     supertest(app)
       .post('/')
       .set('Content-Type', "application/json")

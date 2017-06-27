@@ -44,7 +44,7 @@ app.use((req: SwivRequest, res: Response, next: Function) => {
 app.use('/', plywoodRouter);
 
 describe('plywood router', () => {
-  it('must have dataCube', (testComplete) => {
+  it('must have dataCube', (testComplete: any) => {
     supertest(app)
       .post('/')
       .set('Content-Type', "application/json")
@@ -59,7 +59,7 @@ describe('plywood router', () => {
       }, testComplete);
   });
 
-  it('does a query (value)', (testComplete) => {
+  it('does a query (value)', (testComplete: any) => {
     supertest(app)
       .post('/')
       .set('Content-Type', "application/json")
@@ -75,7 +75,7 @@ describe('plywood router', () => {
       }, testComplete);
   });
 
-  it('does a query (dataset)', (testComplete) => {
+  it('does a query (dataset)', (testComplete: any) => {
     supertest(app)
       .post('/')
       .set('Content-Type', "application/json")

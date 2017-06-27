@@ -22,6 +22,8 @@ import { NumberRange, TimeRange, LiteralExpression } from 'swiv-plywood';
 import { Dimension, FilterClause, Filter } from '../../models/index';
 import { DisplayYear, formatTimeRange } from '../../utils/time/time';
 
+var moment = require('moment-timezone');
+
 export interface Formatter {
   (n: number): string;
 }
@@ -89,6 +91,10 @@ export function formatterFromData(values: number[], format: string): Formatter {
 
 export function formatNumberRange(value: NumberRange) {
   return `${formatValue(value.start || `any`)} to ${formatValue(value.end  || `any`)}`;
+}
+
+export function formatDateWithTZ(value: Date, timezone: Timezone, showTZ: boolean): string {
+  return moment.tz(value, timezone.toString()).format(showTZ ? "YYYY-MM-DD HH:mm:ss (z)" : "YYYY-MM-DD HH:mm:ss");
 }
 
 export function formatValue(value: any, timezone?: Timezone, displayYear?: DisplayYear): string {

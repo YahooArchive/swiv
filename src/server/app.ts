@@ -17,6 +17,7 @@
 import * as express from 'express';
 import { Request, Response, Router, Handler } from 'express';
 import * as hsts from 'hsts';
+import * as Rollbar from 'rollbar';
 
 import * as path from 'path';
 import * as bodyParser from 'body-parser';
@@ -30,9 +31,9 @@ if (!WallTime.rules) {
   WallTime.init(tzData.rules, tzData.zones);
 }
 
-import { GetSettingsOptions } from '../server/utils/settings-manager/settings-manager';
+import { GetSettingsOptions } from './utils/settings-manager/settings-manager';
 import { SwivRequest } from './utils/index';
-import { VERSION, AUTH, SERVER_SETTINGS, SETTINGS_MANAGER } from './config';
+import { VERSION, SERVER_SETTINGS, SETTINGS_MANAGER, ROLLBAR } from './config';
 import * as plywoodRoutes from './routes/plywood/plywood';
 import * as plyqlRoutes from './routes/plyql/plyql';
 import * as swivRoutes from './routes/swiv/swiv';
@@ -41,6 +42,7 @@ import * as settingsRoutes from './routes/settings/settings';
 import * as mkurlRoutes from './routes/mkurl/mkurl';
 import * as healthRoutes from './routes/health/health';
 import * as errorRoutes from './routes/error/error';
+import RemergeAuth from './remerge-auth';
 
 import { errorLayout } from './views';
 
@@ -48,18 +50,14 @@ function makeGuard(guard: string): Handler {
   return (req: SwivRequest, res: Response, next: Function) => {
     const user = req.user;
     if (!user) {
-      next(new Error('no user'));
+      res.redirect('/login');
       return;
     }
 
     const { allow } = user;
-    if (!allow) {
-      next(new Error('no user.allow'));
-      return;
-    }
-
-    if (!allow[guard]) {
-      next(new Error('not allowed'));
+    if (!allow || !allow[guard]) {
+      res.status(401);
+      res.send('Unauthorized');
       return;
     }
 
@@ -135,32 +133,16 @@ app.use((req: SwivRequest, res: Response, next: Function) => {
   next();
 });
 
-// Auth
-if (AUTH) {
-  app.use(AUTH);
-} else {
-  app.use((req: SwivRequest, res: Response, next: Function) => {
-    if (req.stateful) {
-      req.user = {
-        id: 'admin',
-        email: 'admin@admin.com',
-        displayName: 'Admin',
-        allow: {
-          settings: true
-        }
-      };
-    }
-    next();
-  });
-}
+// Remerge authentication
+RemergeAuth.inject(app);
 
 // Data routes
-addRoutes('/plywood', plywoodRoutes);
-addRoutes('/plyql', plyqlRoutes);
+addGuardedRoutes('/plywood', 'access', plywoodRoutes);
+addGuardedRoutes('/plyql', 'access', plyqlRoutes);
 addRoutes('/mkurl', mkurlRoutes);
-addRoutes('/error', errorRoutes);
+addGuardedRoutes('/error', 'access', errorRoutes);
 if (stateful) {
-  addRoutes('/collections', collectionsRoutes);
+  addGuardedRoutes('/collections', 'access', collectionsRoutes);
   addGuardedRoutes('/settings', 'settings', settingsRoutes);
 }
 
@@ -174,7 +156,7 @@ if (SERVER_SETTINGS.getIframe() === 'deny') {
   });
 }
 
-addRoutes('/', swivRoutes);
+addGuardedRoutes('/', 'access', swivRoutes);
 
 // Catch 404 and redirect to /
 app.use((req: Request, res: Response, next: Function) => {
@@ -196,6 +178,19 @@ if (app.get('env') === 'development') { // NODE_ENV
 
 // production error handler
 // no stacktraces leaked to user
+if (ROLLBAR) {
+  const rollbarConfig = {
+    accessToken: ROLLBAR.server_token,
+    captureUncaught: true,
+    captureUnhandledRejections: true,
+    environment: ROLLBAR.environment,
+    logLevel: 'info',
+    reportLevel: ROLLBAR.report_level
+  };
+  const rollbar = new Rollbar(rollbarConfig);
+  app.use(rollbar.errorHandler());
+}
+
 app.use((err: any, req: Request, res: Response, next: Function) => {
   LOGGER.error(`Server Error: ${err.message}`);
   LOGGER.error(err.stack);

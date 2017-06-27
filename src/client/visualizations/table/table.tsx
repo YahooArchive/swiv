@@ -20,7 +20,7 @@ import { List } from 'immutable';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { $, ply, r, Expression, RefExpression, Executor, Dataset, Datum, PseudoDatum, TimeRange, Set, SortAction, NumberRange } from 'swiv-plywood';
-import { formatterFromData, formatNumberRange, Formatter } from '../../../common/utils/formatter/formatter';
+import { formatterFromData, formatNumberRange, formatDateWithTZ, Formatter } from '../../../common/utils/formatter/formatter';
 import { Stage, Filter, FilterClause, Essence, VisStrategy, Splits, SplitCombine, Dimension,
   Measure, Colors, DataCube, VisualizationProps, DatasetLoad } from '../../../common/models/index';
 import { TABLE_MANIFEST } from '../../../common/manifests/table/table';
@@ -41,9 +41,9 @@ const SPACE_LEFT = 10;
 const SPACE_RIGHT = 10;
 const HIGHLIGHT_BUBBLE_V_OFFSET = -4;
 
-function formatSegment(value: any): string {
+function formatSegment(value: any, timezone: any): string {
   if (TimeRange.isTimeRange(value)) {
-    return value.start.toISOString();
+    return formatDateWithTZ(value.start, timezone, true);
   } else if (NumberRange.isNumberRange(value)) {
     return formatNumberRange(value);
   }
@@ -74,6 +74,8 @@ export interface PositionHover {
 export interface TableState extends BaseVisualizationState {
   flatData?: PseudoDatum[];
   hoverRow?: Datum;
+
+  resizedLeft?: number;
 }
 
 export class Table extends BaseVisualization<TableState> {
@@ -95,7 +97,11 @@ export class Table extends BaseVisualization<TableState> {
   getSegmentWidth(): number {
     const { isThumbnail } = this.props;
 
-    return isThumbnail ? THUMBNAIL_SEGMENT_WIDTH : SEGMENT_WIDTH;
+    return isThumbnail ? THUMBNAIL_SEGMENT_WIDTH : this.state.resizedLeft || SEGMENT_WIDTH;
+  }
+
+  updateLeftOffset(value: number) {
+    this.setState({resizedLeft: value});
   }
 
   calculateMousePosition(x: number, y: number): PositionHover {
@@ -336,7 +342,7 @@ export class Table extends BaseVisualization<TableState> {
   renderInternals() {
     var { clicker, essence, stage, openRawDataModal, isThumbnail } = this.props;
     var { flatData, scrollTop, hoverMeasure, hoverRow } = this.state;
-    var { splits, dataCube } = essence;
+    var { splits, dataCube, timezone } = essence;
 
     var segmentTitle = splits.getTitle(essence.dataCube.dimensions);
 
@@ -373,9 +379,8 @@ export class Table extends BaseVisualization<TableState> {
 
         var split = nest > 0 ? splits.get(nest - 1) : null;
         var dimension = split ? split.getDimension(dataCube.dimensions) : null;
-
         var segmentValue = dimension ? d[dimension.name] : '';
-        var segmentName = nest ? formatSegment(segmentValue) : 'Total';
+        var segmentName = nest ? formatSegment(segmentValue, timezone) : 'Total';
         var left = Math.max(0, nest - 1) * INDENT_WIDTH;
         var segmentStyle = { left: left, width: this.getSegmentWidth() - left, top: rowY };
         var hoverClass = d === hoverRow ? 'hover' : null;
@@ -433,8 +438,9 @@ export class Table extends BaseVisualization<TableState> {
       <div className="highlight">{highlighter}</div>
     </div>;
 
+    let corner_style = {width: this.getSegmentWidth()};
     const corner = <div className="corner">
-      <div className="corner-wrap">{segmentTitle}</div>
+      <div className="corner-wrap" style={corner_style}>{segmentTitle}</div>
       {cornerSortArrow}
     </div>;
 
@@ -468,7 +474,7 @@ export class Table extends BaseVisualization<TableState> {
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseLeave={this.onMouseLeave.bind(this)}
         onScroll={this.onSimpleScroll.bind(this)}
-
+        onLeftColumnResize={this.updateLeftOffset.bind(this)}
       />
 
       {highlightBubble}

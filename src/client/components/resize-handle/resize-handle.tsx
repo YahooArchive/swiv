@@ -31,6 +31,7 @@ export interface ResizeHandleProps extends React.Props<any> {
   initialValue: number;
   onResize?: (newX: number) => void;
   onResizeEnd?: (newX: number) => void;
+  hideIcon?: boolean;
 }
 
 export interface ResizeHandleState {
@@ -116,7 +117,7 @@ export class ResizeHandle extends React.Component<ResizeHandleProps, ResizeHandl
 
 
   render() {
-    let { side } = this.props;
+    let { side, hideIcon } = this.props;
 
     let style: React.CSSProperties = {};
     style[side] = this.state.currentValue ;
@@ -128,7 +129,7 @@ export class ResizeHandle extends React.Component<ResizeHandleProps, ResizeHandl
       style={style}
       onMouseDown={this.onMouseDown.bind(this)}
     >
-      <SvgIcon svg={require('../../icons/drag-handle.svg')}/>
+      {!hideIcon ? <SvgIcon svg={require('../../icons/drag-handle.svg')}/> : null }
     </div>;
   }
 }

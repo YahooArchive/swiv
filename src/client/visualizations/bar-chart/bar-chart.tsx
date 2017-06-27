@@ -666,6 +666,7 @@ export class BarChart extends BaseVisualization<BarChartState> {
       stage={axisStage}
       ticks={yTicks}
       scale={yScale}
+      format={measure.format}
       hideZero={true}
     />;
 

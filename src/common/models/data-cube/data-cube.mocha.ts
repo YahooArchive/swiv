@@ -328,7 +328,7 @@ describe('DataCube', () => {
           "priority": 13
         },
         "refreshRule": {
-          "refresh": "PT1M",
+          "refresh": "P1Y",
           "rule": "query"
         },
         "source": "wiki",

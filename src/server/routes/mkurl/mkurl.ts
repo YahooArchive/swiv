@@ -23,7 +23,7 @@ import { SwivRequest } from '../../utils/index';
 var router = Router();
 
 router.post('/', (req: SwivRequest, res: Response) => {
-  var { domain, dataCube, dataSource, essence } = req.body;
+  var { domain, dataCube, dataSource, essence, redirect } = req.body;
   dataCube = dataCube || dataSource; // back compat
 
   if (typeof domain !== 'string') {
@@ -67,10 +67,14 @@ router.post('/', (req: SwivRequest, res: Response) => {
         });
         return;
       }
-
-      res.json({
-        url: essenceObj.getURL(`${domain}#${myDataCube.name}/`)
-      });
+      let url = essenceObj.getURL(`${domain}#${myDataCube.name}/`);
+      if (redirect === 'true') {
+        res.redirect(url);
+      } else {
+        res.json({
+          url: url
+        });
+      }
     })
     .done();
 

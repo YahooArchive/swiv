@@ -17,28 +17,31 @@
 import { expect } from 'chai';
 import '../../utils/test-utils/index';
 import { Dataset } from 'swiv-plywood';
-import { datasetToFileString, getMIMEType } from './download';
+import { datasetToWritable, getMIMEType } from './download';
+import { EssenceMock } from '../../../common/models/mocks';
 
 describe.skip('Download', () => {
-  describe('datasetToFileString', () => {
+  describe('datasetToWritable', () => {
 
     it('defaults to JSON if no type specified', () => {
       var dsJS = [
         { x: 1, y: "hello", z: 2 },
         { x: 2, y: "world", z: 3 }
       ];
+      var e = EssenceMock.wikiTotals();
       var ds = Dataset.fromJS(dsJS);
-      expect(() => { JSON.parse(datasetToFileString(ds)); }).to.not.throw();
-      expect(JSON.parse(datasetToFileString(ds))).to.deep.equal(dsJS);
+      expect(() => { JSON.parse((<string>datasetToWritable(e, ds))); }).to.not.throw();
+      expect(JSON.parse((<string>datasetToWritable(e, ds)))).to.deep.equal(dsJS);
     });
 
     it('encloses set/string in brackets appropriately', () => {
+      var e = EssenceMock.wikiTotals();
       var ds = Dataset.fromJS([
         { y: ["dear", "john"] },
         { y: ["from", "peter"] }
       ]);
-      expect(datasetToFileString(ds, 'csv').indexOf("\"[dear,john\"]"), 'csv').to.not.equal(-1);
-      expect(datasetToFileString(ds, 'tsv').indexOf("[dear,john]"), 'tsv').to.not.equal(-1);
+      expect((<string>datasetToWritable(e, ds, 'csv')).indexOf("\"[dear,john\"]"), 'csv').to.not.equal(-1);
+      expect((<string>datasetToWritable(e, ds, 'tsv')).indexOf("[dear,john]"), 'tsv').to.not.equal(-1);
     });
   });
 

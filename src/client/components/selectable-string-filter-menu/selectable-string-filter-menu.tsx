@@ -50,6 +50,7 @@ export interface SelectableStringFilterMenuState {
   selectedValues?: Set;
   promotedValues?: Set; // initial selected values
   colors?: Colors;
+  highlightedValue?: any;
 }
 
 export class SelectableStringFilterMenu extends React.Component<SelectableStringFilterMenuProps, SelectableStringFilterMenuState> {
@@ -127,7 +128,7 @@ export class SelectableStringFilterMenu extends React.Component<SelectableString
     var existingMode = filter.getModeForDimension(dimension);
 
     var valueSet = filter.getLiteralSet(dimension.expression);
-    var selectedValues = (existingMode !== 'match' && valueSet) || (myColors ? myColors.toSet() : null) || Set.EMPTY; // don't want regex to show up as a promoted value
+    let selectedValues = (existingMode as string !== 'regex' && valueSet) || (myColors ? myColors.toSet() : null) || Set.EMPTY; // don't want regex to show up as a promoted value
     this.setState({
       selectedValues: selectedValues,
       promotedValues: selectedValues,
@@ -159,7 +160,53 @@ export class SelectableStringFilterMenu extends React.Component<SelectableString
     }
   }
 
+  generateRowStrings() {
+    let { dataset, promotedValues } = this.state;
+    let { dimension, searchText } = this.props;
+
+    let promotedElements = promotedValues ? promotedValues.elements : [];
+    let rowData = dataset.data.slice(0, TOP_N).filter((d) => {
+      return promotedElements.indexOf(d[dimension.name]) === -1;
+    });
+    let rowStrings = promotedElements.concat(rowData.map((d) => d[dimension.name]));
+    if (searchText) {
+      let searchTextLower = searchText.toLowerCase();
+      rowStrings = rowStrings.filter((d) => {
+        return String(d).toLowerCase().indexOf(searchTextLower) !== -1;
+      });
+    }
+    return rowStrings;
+  }
+
   globalKeyDownListener(e: KeyboardEvent) {
+    let { highlightedValue, selectedValues} = this.state;
+
+    if ([13, 32, 38, 40].some(x => x === e.keyCode)) {
+      let rowStrings = this.generateRowStrings();
+      switch (e.keyCode) {
+        case(38): { // arrow up
+          highlightedValue = highlightedValue ? rowStrings[rowStrings.indexOf(highlightedValue) - 1] : rowStrings[0];
+          break;
+        }
+        case(40): { // arrow down
+          highlightedValue = highlightedValue ? rowStrings[rowStrings.indexOf(highlightedValue) + 1] : rowStrings[0];
+          break;
+        }
+        case(32): { // space
+          e.preventDefault();
+          selectedValues = selectedValues.toggle(highlightedValue);
+          break;
+        }
+        case(13): { //enter
+          if (rowStrings.length === 1) {
+            selectedValues = selectedValues.toggle(rowStrings[0]);
+          }
+        }
+      }
+      this.setState({ highlightedValue });
+      this.setState({ selectedValues });
+    }
+
     if (enterKey(e)) {
       this.onOkClick();
     }
@@ -223,34 +270,25 @@ export class SelectableStringFilterMenu extends React.Component<SelectableString
   }
 
   renderRows() {
-    var { loading, dataset, fetchQueued, selectedValues, promotedValues } = this.state;
-    var { dimension, filterMode, searchText } = this.props;
+    var { loading, dataset, fetchQueued, selectedValues, highlightedValue } = this.state;
+    var { filterMode, searchText } = this.props;
 
     var rows: Array<JSX.Element> = [];
     if (dataset) {
-      var promotedElements = promotedValues ? promotedValues.elements : [];
-      var rowData = dataset.data.slice(0, TOP_N).filter((d) => {
-        return promotedElements.indexOf(d[dimension.name]) === -1;
-      });
-      var rowStrings = promotedElements.concat(rowData.map((d) => d[dimension.name]));
-
-      if (searchText) {
-        var searchTextLower = searchText.toLowerCase();
-        rowStrings = rowStrings.filter((d) => {
-          return String(d).toLowerCase().indexOf(searchTextLower) !== -1;
-        });
-      }
+      let rowStrings = this.generateRowStrings();
 
       var checkboxType = filterMode === Filter.EXCLUDED ? 'cross' : 'check';
+      let longestString = Math.max(...rowStrings.map(function (rowString: String): number {return rowString ? rowString.length : 0; }));
+      let rowstyle = {width: Math.max(450, longestString * 8)};
       rows = rowStrings.map((segmentValue) => {
-          var segmentValueStr = String(segmentValue);
-          var selected = selectedValues && selectedValues.contains(segmentValue);
-
-          return <div
-            className={classNames('row', { 'selected': selected })}
+        var segmentValueStr = String(segmentValue);
+        var selected = selectedValues && selectedValues.contains(segmentValue);
+        return <div
+            className={classNames('row', { 'selected': selected }, {'highlighted': segmentValueStr === highlightedValue})}
             key={segmentValueStr}
             title={segmentValueStr}
             onClick={this.onValueClick.bind(this, segmentValue)}
+            style={rowstyle}
           >
             <div className="row-wrapper">
               <Checkbox type={checkboxType as CheckboxType} selected={selected}/>

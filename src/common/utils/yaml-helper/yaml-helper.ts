@@ -199,7 +199,7 @@ export function attributeToYAML(attribute: AttributeInfo): string[] {
 export function dimensionToYAML(dimension: Dimension): string[] {
   var lines: string[] = [
     `name: ${dimension.name}`,
-    `title: ${dimension.title}`
+    `title: '${dimension.title}'`
   ];
 
   if (dimension.kind !== 'string') {
@@ -215,7 +215,7 @@ export function dimensionToYAML(dimension: Dimension): string[] {
 export function measureToYAML(measure: Measure): string[] {
   var lines: string[] = [
     `name: ${measure.name}`,
-    `title: ${measure.title}`
+    `title: '${measure.title}'`
   ];
 
   if (measure.units) {
@@ -236,7 +236,7 @@ export function measureToYAML(measure: Measure): string[] {
 export function dataCubeToYAML(dataCube: DataCube, withComments: boolean): string[] {
   var lines: string[] = [
     `name: ${dataCube.name}`,
-    `title: ${dataCube.title}`,
+    `title: '${dataCube.title}'`,
     `clusterName: ${dataCube.clusterName}`,
     `source: ${dataCube.source}`
   ];

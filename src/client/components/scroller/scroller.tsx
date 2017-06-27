@@ -20,6 +20,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { clamp, classNames, getXFromEvent, getYFromEvent } from '../../utils/dom/dom';
 import { firstUp } from '../../../common/utils/string/string';
+import { ResizeHandle } from "../resize-handle/resize-handle";
 
 export type XSide = 'left' | 'right';
 export type YSide = 'top' | 'bottom';
@@ -42,6 +43,7 @@ export interface ScrollerProps extends React.Props<any> {
   onMouseMove?: (x: number, y: number, part: ScrollerPart) => void;
   onMouseLeave?: () => void;
   onScroll?: (scrollTop: number, scrollLeft: number) => void;
+  onLeftColumnResize?: (value: number) => void;
 
   // "Transcluded" elements
   topGutter?: JSX.Element | JSX.Element[];
@@ -62,7 +64,10 @@ export interface ScrollerState {
 
   viewportHeight?: number;
   viewportWidth?: number;
+
+  resizedLeft?: number;
 }
+
 
 export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
   static TOP_LEFT_CORNER: ScrollerPart = 'top-left-corner';
@@ -97,6 +102,10 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
     this.updateViewport();
   }
 
+  private getLeftWidth(): number {
+    return this.state.resizedLeft || this.props.layout.left;
+  }
+
   private getGutterStyle(side: XSide | YSide): React.CSSProperties {
     const { layout } = this.props;
     const { scrollLeft, scrollTop } = this.state;
@@ -105,7 +114,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
       case "top":
         return {
           height: layout.top,
-          left: layout.left - scrollLeft,
+          left: this.getLeftWidth() - scrollLeft,
           right: layout.right
         };
 
@@ -120,14 +129,14 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
       case "bottom":
         return {
           height: layout.bottom,
-          left: layout.left - scrollLeft,
+          left: this.getLeftWidth() - scrollLeft,
           right: layout.right,
           bottom: 0
         };
 
       case "left":
         return {
-          width: layout.left,
+          width: this.getLeftWidth(),
           left: 0,
           top: layout.top - scrollTop,
           bottom: layout.bottom
@@ -141,10 +150,10 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
   private getCornerStyle(yPos: YSide, xPos: XSide): React.CSSProperties {
     const { layout } = this.props;
 
-    var style: any = {};
+    let style: any = {};
     if (xPos === 'left') {
       style.left = 0;
-      style.width = layout.left;
+      style.width = this.getLeftWidth();
     } else {
       style.right = 0;
       style.width = layout.right;
@@ -175,7 +184,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
         return {height: layout.bottom, bottom: 0, left: 0, right: 0};
 
       case "left":
-        return {width: layout.left, left: 0, top: 0, bottom: 0};
+        return {width: this.getLeftWidth(), left: 0, top: 0, bottom: 0};
 
       default:
         throw new Error("Unknown side for shadow. This shouldn't happen.");
@@ -190,7 +199,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
       top: layout.top - scrollTop,
       right: layout.right,
       bottom: layout.bottom,
-      left: layout.left - scrollLeft
+      left: this.getLeftWidth() - scrollLeft
     };
   }
 
@@ -198,7 +207,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
     const { layout } = this.props;
 
     return {
-      width: layout.bodyWidth + layout.left + layout.right,
+      width: layout.bodyWidth + this.getLeftWidth() + layout.right,
       height: layout.bodyHeight + layout.top + layout.bottom
     };
   }
@@ -210,11 +219,11 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
   private onScroll(e: UIEvent) {
     const { bodyWidth, bodyHeight } = this.props.layout;
     const { viewportWidth, viewportHeight } = this.state;
-    var target = e.target as Element;
-​
-    var scrollLeft = clamp(target.scrollLeft, 0, Math.max(bodyWidth - viewportWidth, 0));
-    var scrollTop = clamp(target.scrollTop, 0, Math.max(bodyHeight - viewportHeight, 0));
-​
+    let target = e.target as Element;
+
+    let scrollLeft = clamp(target.scrollLeft, 0, Math.max(bodyWidth - viewportWidth, 0));
+    let scrollTop = clamp(target.scrollTop, 0, Math.max(bodyHeight - viewportHeight, 0));​
+
     if (this.props.onScroll !== undefined) {
       this.setState({
         scrollTop,
@@ -311,6 +320,22 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
     return <div className={[yPos, xPos, 'corner'].join('-')} style={style}>{element}</div>;
   }
 
+  private leftWidthChange(value: number) {
+    this.setState({resizedLeft: value});
+    this.props.onLeftColumnResize(value);
+  }
+
+  renderResizer() {
+    return <ResizeHandle
+      side="left"
+      initialValue={310}
+      min={110}
+      max={1000}
+      onResize={this.leftWidthChange.bind(this)}
+      hideIcon={true}
+    />;
+  }
+
   componentDidMount() {
     window.addEventListener('resize', this.globalResizeListener);
     this.updateViewport();
@@ -341,7 +366,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
 
   render() {
     const { viewportWidth, viewportHeight } = this.state;
-    const { body, overlay, onMouseLeave, layout } = this.props;
+    const { body, overlay, onMouseLeave, layout, onLeftColumnResize } = this.props;
 
     if (!layout) return null;
 
@@ -395,6 +420,7 @@ export class Scroller extends React.Component<ScrollerProps, ScrollerState> {
        >
         <div className="event-target" style={this.getTargetStyle()}/>
       </div>
+      { onLeftColumnResize ? this.renderResizer() : null}
 
     </div>;
   }

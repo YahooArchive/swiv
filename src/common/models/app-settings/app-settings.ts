@@ -24,6 +24,12 @@ import { DataCube, DataCubeJS } from  '../data-cube/data-cube';
 import { Collection, CollectionJS, CollectionContext } from '../collection/collection';
 import { Manifest } from '../manifest/manifest';
 
+export interface Rollbar {
+  server_token?: string;
+  client_token?: string;
+  report_level?: string;
+  environment?: string;
+}
 export interface AppSettingsValue {
   version?: number;
   clusters?: Cluster[];
@@ -31,6 +37,7 @@ export interface AppSettingsValue {
   dataCubes?: DataCube[];
   linkViewConfig?: Collection;
   collections?: Collection[];
+  rollbar?: Rollbar;
 }
 
 export interface AppSettingsJS {
@@ -40,6 +47,7 @@ export interface AppSettingsJS {
   dataCubes?: DataCubeJS[];
   linkViewConfig?: CollectionJS;
   collections?: CollectionJS[];
+  rollbar?: Rollbar;
 }
 
 export interface AppSettingsContext {
@@ -99,7 +107,8 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
       customization: Customization.fromJS(parameters.customization || {}),
       dataCubes,
       linkViewConfig: makeCollection(parameters.linkViewConfig),
-      collections: parameters.collections ? parameters.collections.map(makeCollection).filter(Boolean) : []
+      collections: parameters.collections ? parameters.collections.map(makeCollection).filter(Boolean) : [],
+      rollbar: parameters.rollbar
     };
 
     return new AppSettings(value);
@@ -111,6 +120,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
   public dataCubes: DataCube[];
   public linkViewConfig: Collection;
   public collections: Collection[];
+  public rollbar: Rollbar;
 
   constructor(parameters: AppSettingsValue) {
     const {
@@ -119,7 +129,8 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
       customization,
       dataCubes,
       linkViewConfig,
-      collections
+      collections,
+      rollbar
     } = parameters;
 
     for (var dataCube of dataCubes) {
@@ -135,6 +146,7 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     this.dataCubes = dataCubes;
     this.linkViewConfig = linkViewConfig;
     this.collections = collections;
+    this.rollbar = rollbar;
   }
 
   public valueOf(): AppSettingsValue {
@@ -144,7 +156,8 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
       customization: this.customization,
       dataCubes: this.dataCubes,
       linkViewConfig: this.linkViewConfig,
-      collections: this.collections
+      collections: this.collections,
+      rollbar: this.rollbar
     };
   }
 
@@ -156,6 +169,10 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
     js.dataCubes = this.dataCubes.map(dataCube => dataCube.toJS());
     if (this.collections.length > 0) js.collections = this.collections.map(c => c.toJS());
     if (this.linkViewConfig) js.linkViewConfig = this.linkViewConfig.toJS();
+    if (this.rollbar) {
+      this.rollbar.server_token = null; // STRIP the server_token!
+      js.rollbar = this.rollbar;
+    }
     return js;
   }
 
@@ -174,7 +191,8 @@ export class AppSettings implements Instance<AppSettingsValue, AppSettingsJS> {
       immutableEqual(this.customization, other.customization) &&
       immutableArraysEqual(this.dataCubes, other.dataCubes) &&
       Boolean(this.linkViewConfig) === Boolean(other.linkViewConfig) &&
-      immutableArraysEqual(this.collections, other.collections);
+      immutableArraysEqual(this.collections, other.collections) &&
+      this.rollbar === other.rollbar; // FIXME: will this work? Prolly not. But is the function ever called?
   }
 
   public toClientSettings(): AppSettings {

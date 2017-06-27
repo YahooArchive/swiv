@@ -27,6 +27,8 @@ import { DimensionActionsMenu } from '../dimension-actions-menu/dimension-action
 import { TileHeaderIcon } from '../tile-header/tile-header';
 import { HighlightString } from '../highlight-string/highlight-string';
 import { SearchableTile } from '../searchable-tile/searchable-tile';
+import { GlobalEventListener } from "../global-event-listener/global-event-listener";
+
 
 const DIMENSION_CLASS_NAME = 'dimension';
 
@@ -47,6 +49,10 @@ export interface DimensionListTileState {
   highlightDimension?: Dimension;
   showSearch?: boolean;
   searchText?: string;
+  filterAction?: any;
+  pinAction?: any;
+  splitAction?: any;
+  splitAppendAction?: any;
 }
 
 export class DimensionListTile extends React.Component<DimensionListTileProps, DimensionListTileState> {
@@ -144,6 +150,82 @@ export class DimensionListTile extends React.Component<DimensionListTileProps, D
     });
   }
 
+  showDimensions() {
+    let { essence } = this.props;
+    let { searchText } = this.state;
+    let shownDimensions = essence.dataCube.dimensions.toArray();
+    if (searchText) {
+      shownDimensions = shownDimensions.filter((r) => {
+        return r.title.toLowerCase().indexOf(searchText.toLowerCase()) !== -1;
+      });
+    }
+    return shownDimensions;
+  }
+
+  globalKeyDownListener(e: KeyboardEvent) {
+    if (e.shiftKey && e.keyCode === 68) {
+      e.preventDefault();
+      this.toggleSearch();
+    }
+  }
+
+  localKeyDownListener(e: KeyboardEvent) {
+    let { highlightDimension, menuOpenOn } = this.state;
+
+    if (e.keyCode === 38 || e.keyCode === 40) {
+      let shownDimensions = this.showDimensions();
+      if (e.keyCode === 38) { // arrow up
+        highlightDimension = highlightDimension ? shownDimensions[shownDimensions.indexOf(highlightDimension) - 1] : shownDimensions[0];
+      }
+      if (e.keyCode === 40) { // arrow down
+        highlightDimension = highlightDimension ? shownDimensions[shownDimensions.indexOf(highlightDimension) + 1] : shownDimensions[0];
+      }
+      this.setState({ highlightDimension });
+    }
+
+    switch (e.keyCode) {
+      case(32): { // space
+        e.preventDefault();
+        let target = document.getElementsByClassName(DIMENSION_CLASS_NAME + " highlight")[0];
+        if (menuOpenOn === target) {
+          this.closeMenu();
+          return;
+        }
+        this.setState({
+          menuOpenOn: target,
+          menuDimension: highlightDimension
+        });
+        break;
+      }
+      case(70): { // F
+        if (!menuOpenOn) return;
+        e.preventDefault();
+        this.state.filterAction.click();
+        break;
+      }
+      case(80): { // P
+        if (!menuOpenOn) return;
+        e.preventDefault();
+        this.state.pinAction.click();
+        break;
+      }
+      case(83): { // S
+        if (!menuOpenOn) return;
+        e.preventDefault();
+        this.state.splitAction.click();
+        break;
+      }
+      case(187): { // + (or rather = )
+        if (!menuOpenOn) return;
+        e.preventDefault();
+        this.state.splitAppendAction.click();
+        break;
+      }
+
+    }
+
+  }
+
   renderMenu(): JSX.Element {
     var { essence, clicker, menuStage, triggerFilterMenu, triggerSplitMenu } = this.props;
     var { DimensionActionsMenuAsync, menuOpenOn, menuDimension } = this.state;
@@ -160,21 +242,19 @@ export class DimensionListTile extends React.Component<DimensionListTileProps, D
       triggerFilterMenu={triggerFilterMenu}
       triggerSplitMenu={triggerSplitMenu}
       onClose={onClose}
+      filterAction={(el: any) => {this.state.filterAction = el; }}
+      pinAction={(el: any) => {this.state.pinAction = el; }}
+      splitAction={(el: any) => {this.state.splitAction = el; }}
+      splitAppendAction={(el: any) => {this.state.splitAppendAction = el; }}
+
     />;
   }
 
   render() {
-    var { essence, style } = this.props;
-    var { menuDimension, highlightDimension, showSearch, searchText } = this.state;
-    var { dataCube } = essence;
-    var shownDimensions = dataCube.dimensions.toArray();
-    var itemY = 0;
-
-    if (searchText) {
-      shownDimensions = shownDimensions.filter((r) => {
-        return r.title.toLowerCase().indexOf(searchText.toLowerCase()) !== -1;
-      });
-    }
+    let { style } = this.props;
+    let { menuDimension, highlightDimension, showSearch, searchText } = this.state;
+    let itemY = 0;
+    let shownDimensions = this.showDimensions();
 
     const dimensionItems = shownDimensions.map((dimension) => {
       var className = classNames(
@@ -207,7 +287,6 @@ export class DimensionListTile extends React.Component<DimensionListTileProps, D
 
       </div>;
     }, this);
-
     var message: JSX.Element = null;
     if (searchText && !dimensionItems.length) {
       message = <div className="message">{`No ${ STRINGS.dimensions.toLowerCase() } for "${searchText}"`}</div>;
@@ -233,7 +312,11 @@ export class DimensionListTile extends React.Component<DimensionListTileProps, D
       showSearch={showSearch}
       icons={icons}
       className='dimension-list-tile'
+      onKeyDown={this.localKeyDownListener.bind(this)}
     >
+      <GlobalEventListener
+        keyDown={this.globalKeyDownListener.bind(this)}
+      />
       <div className="items" ref="items">
         {dimensionItems}
         { message }

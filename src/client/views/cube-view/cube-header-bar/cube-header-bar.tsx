@@ -98,7 +98,7 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
   setAutoRefreshFromDataCube(dataCube: DataCube) {
     const { refreshRule } = dataCube;
     if (refreshRule.isFixed()) return;
-    this.setAutoRefreshRate(Duration.fromJS('PT5M')); // ToDo: make this configurable maybe?
+    this.setAutoRefreshRate(Duration.fromJS('P1Y')); // ToDo: make this configurable maybe? YES WE SHOULD
   }
 
   setAutoRefreshRate(rate: Duration) {
@@ -279,8 +279,8 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
 
 
   render() {
-    var { user, onNavClick, essence, customization } = this.props;
-    var { animating } = this.state;
+    let { user, onNavClick, essence, customization, refreshMaxTime } = this.props;
+    let { animating } = this.state;
 
     var userButton: JSX.Element = null;
     if (user) {
@@ -304,7 +304,7 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
         <div className="title">{essence.dataCube.title}</div>
       </div>
       <div className="right-bar">
-        <div className={classNames("icon-button", "auto-refresh", { "refreshing": animating })} onClick={this.onAutoRefreshMenuClick.bind(this)}>
+        <div className={classNames("icon-button", "refresh-button", { "refreshing": animating })} onClick={refreshMaxTime.bind(this)}>
           <SvgIcon className="auto-refresh-icon" svg={require('../../../icons/full-refresh.svg')}/>
         </div>
         <div className="icon-button hiluk" onClick={this.onHilukMenuClick.bind(this)}>
@@ -316,7 +316,7 @@ export class CubeHeaderBar extends React.Component<CubeHeaderBarProps, CubeHeade
         {userButton}
       </div>
       {this.renderHilukMenu()}
-      {this.renderAutoRefreshMenu()}
+      {/*{this.renderAutoRefreshMenu()}*/}
       {this.renderSettingsMenu()}
       {this.renderUserMenu()}
     </header>;
