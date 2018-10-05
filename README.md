@@ -2,6 +2,8 @@
 
 # Swiv
 
+**Swiv is no longer actively supported or maintained. For something that is under active development, you might be interested in [turnilo](https://github.com/allegro/turnilo).**
+
 Swiv is a web-based exploratory visualization UI for [Druid](https://github.com/druid-io/druid) built on top of 
 [Plywood](https://github.com/implydata/plywood). 
 
